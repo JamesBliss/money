@@ -1,7 +1,23 @@
+import { Manrope } from '@next/font/google'
+
+// styles
 import '../styles/globals.css'
 
-function MyApp({ Component, pageProps }) {
-  return <Component {...pageProps} />
+// load font styles
+const manrope = Manrope()
+
+//
+function App({ Component, pageProps }) {
+  return (
+    <>
+      <style jsx global>{`
+        html {
+          font-family: ${manrope.style.fontFamily};
+        }
+      `}</style>
+      <Component {...pageProps} />
+    </>
+  )
 }
 
-export default MyApp
+export default App;

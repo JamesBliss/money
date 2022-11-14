@@ -1,65 +1,114 @@
+import React from 'react';
 import Head from 'next/head'
-import styles from '../styles/Home.module.css'
 
-export default function Home() {
+
+import homeStyles from '../styles/Home.module.css'
+import formStyles from '../styles/Form.module.css'
+import currency from 'currency.js';
+
+//
+const Home = () => {
+  const [error, setError] = React.useState(null);
+  const [output, setOutput] = React.useState(null);
+
+
+  const calc = ({ salaryOne, salaryTwo, total }) => {
+    const item = total.value;
+
+    // individual wages
+    const wage1 = salaryOne.value;
+    const wage2 = salaryTwo.value;
+
+    // Overall combined wage
+    const combinedWage = wage1 + wage2
+
+    // Percentage of the rent contributed
+    const wage1Percentage = wage1 / combinedWage;
+    const wage2Percentage = wage2 / combinedWage;
+
+    // Actual amount paid
+    const person1 = wage1Percentage * item;
+    const person2 = wage2Percentage * item;
+
+    return {
+      personOne: currency(person1).value,
+      personTwo: currency(person2).value
+    }
+  }
+
+  const submit = async (e) => {
+    e.preventDefault();
+
+    setOutput(null);
+    setError(null);
+
+    const elementsArray = [...e.target.elements];
+    const formData = elementsArray.reduce((acc, elem) => {
+      if (elem.id) {
+        acc[elem.id] = currency(elem.value);
+      }
+
+      return acc;
+    }, {});
+
+    const results = calc(formData);
+
+    if (!isNaN(results.personOne) && !isNaN(results.personTwo)) {
+      setOutput(results);
+    }
+  };
+
+
   return (
-    <div className={styles.container}>
+    <>
       <Head>
         <title>Create Next App</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+      <main className={homeStyles.main}>
+        <h1 className={homeStyles.title}>
+          How much should I pay?
         </h1>
 
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.js</code>
+        <p className={homeStyles.description}>
+          Enter how much each person earns <br />and see how much each person should pay
         </p>
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h3>Documentation &rarr;</h3>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
+        <form className={homeStyles.grid} onSubmit={submit}>
+          <div className={formStyles.formContainer}>
+            <label name='salaryOne' className={formStyles.formLabel}>Salary One</label>
+            <input min={0} step="any" id='salaryOne' className={formStyles.formInput} type='number' />
+          </div>
+          <div className={formStyles.formContainer}>
+            <label name='salaryTwo' className={formStyles.formLabel}>Salary Two</label>
+            <input min={0} step="any" id='salaryTwo' className={formStyles.formInput} type='number' />
+          </div>
+          <div className={formStyles.formContainer}>
+            <label name='total' className={formStyles.formLabel}>Total Price</label>
+            <input min={0} step="any" id='total' className={formStyles.formInput} type='number' />
+          </div>
 
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h3>Learn &rarr;</h3>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
+          <button type='submit' className={formStyles.formSubmit}>
+            Calculate
+          </button>
+        </form>
 
-          <a
-            href="https://github.com/vercel/next.js/tree/master/examples"
-            className={styles.card}
-          >
-            <h3>Examples &rarr;</h3>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/import?filter=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h3>Deploy &rarr;</h3>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
-        </div>
+        {output && (
+          <footer className={homeStyles.footer}>
+            <h3 className={homeStyles.result}>
+              <small>👤</small>
+              {output.personOne}
+            </h3>
+            <h3 className={homeStyles.result}>
+              <small>👥</small>
+              {output.personTwo}
+            </h3>
+          </footer>
+        )}
       </main>
-
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Powered by{' '}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
-        </a>
-      </footer>
-    </div>
+    </>
   )
 }
+
+export default Home;
